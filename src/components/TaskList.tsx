@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import '../styles/tasklist.scss'
 
@@ -16,14 +16,36 @@ export function TaskList() {
 
   function handleCreateNewTask() {
     // Crie uma nova task com um id random, não permita criar caso o título seja vazio.
+    setTasks([
+      ...tasks,
+      {
+        id: tasks.length,
+        title: newTaskTitle,
+        isComplete: false,
+      }
+    ])
   }
 
   function handleToggleTaskCompletion(id: number) {
+    if(newTaskTitle === '') return new Error('Campo vazio')
     // Altere entre `true` ou `false` o campo `isComplete` de uma task com dado ID
+    const tempTask = tasks.map(el => {
+      if(el.id === id){
+        return {
+          id: el.id,
+          title: el.title,
+          isComplete: el.isComplete ? false : true
+        }
+      }
+      return el
+    })
+    setTasks(tempTask)
   }
 
   function handleRemoveTask(id: number) {
     // Remova uma task da listagem pelo ID
+    const tempTask = tasks.filter(el => el.id !== id)
+    setTasks(tempTask)
   }
 
   return (
@@ -37,8 +59,9 @@ export function TaskList() {
             placeholder="Adicionar novo todo" 
             onChange={(e) => setNewTaskTitle(e.target.value)}
             value={newTaskTitle}
+            required
           />
-          <button type="submit" data-testid="add-task-button" onClick={handleCreateNewTask}>
+          <button type="submit" data-testid="add-task-button" {...(newTaskTitle && { onClick: handleCreateNewTask })}>
             <FiCheckSquare size={16} color="#fff"/>
           </button>
         </div>
